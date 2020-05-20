@@ -32,12 +32,11 @@ def main():
                         help='Optional path to configuration file. ' +
                         'Uses defaultconfig.cfg as default.')
 
-    parser.add_argument('--histalp',
-                        dest='histalp',
-                        action='store_true',
-                        help='Optional. Used without argument, will make a ' +
-                             'HISTALP crossvalidation run.')
-    parser.set_defaults(histalp=False)
+    parser.add_argument('--baselineclimate',
+                        type=str,
+                        default='CRU',
+                        help='Optional. Use any of the baseline climates'
+                             'available in OGGM. Defaults to CRU')
 
     parser.add_argument('--extended',
                         dest='extended',
@@ -51,10 +50,10 @@ def main():
     # run configuration file
     mbcfg.initialize(args.config)
 
-    # HISTALP
-    mbcfg.PARAMS['histalp'] = args.histalp
-    if mbcfg.PARAMS['histalp']:
-        mbcfg.PARAMS['oggmversion'] = mbcfg.PARAMS['oggmversion'] + '-histalp'
+    # CLIMATE
+    mbcfg.PARAMS['baselineclimate'] = args.baselineclimate.strip().upper()
+    mbcfg.PARAMS['oggmversion'] = mbcfg.PARAMS['oggmversion'] + '-{}'.format(
+        mbcfg.PARAMS['baselineclimate'].lower())
 
     # Major crossvalidation
     mbcfg.PARAMS['run_major_crossval'] = args.extended

@@ -62,16 +62,21 @@ def website_main():
         redo_all_plots(vdf)
 
     # split all available files and process seperately:
-    # global reference glaciers, short crossvalidation
+    # CRU
     create_minor_website(env, vdf['cru_short'], 'cru_short.html', nbpaths)
-    # global reference glaciers, extended crossvalidation
     create_major_website(env, vdf['cru_extended'], 'cru_extended.html',
                          nbpaths)
-    # HISTALP reference glaciers, short crossvalidation
+
+    # HISTALP
     create_minor_website(env, vdf['histalp_short'], 'histalp_short.html',
                          nbpaths)
-    # HISTALP reference glaciers, extended crossvalidation
     create_major_website(env, vdf['histalp_extended'], 'histalp_extended.html',
+                         nbpaths)
+
+    # ERA5 Land
+    create_minor_website(env, vdf['era5l_short'], 'era5l_short.html',
+                         nbpaths)
+    create_major_website(env, vdf['era5l_extended'], 'era5l_extended.html',
                          nbpaths)
 
 
@@ -144,6 +149,16 @@ def catalog_storaged_files():
             sort_version = ''.join([_v1[0], '.dev',
                                     '{:03d}'.format(int(_v2[0])), '+', _v2[1]])
 
+        if 'histalp' in parts[1]:
+            climate = 'histalp'
+        elif'era5l' in parts[1]:
+            climate = 'era5l'
+        elif 'cru' in parts[1]:
+            climate = 'cru'
+        else:
+            # legacy cases
+            climate = 'cru'
+
         vdf = vdf.append({'version': parts[1],
                           'sort_version': sort_version,
                           'min_maj': parts[2].split('.')[0],
@@ -152,27 +167,39 @@ def catalog_storaged_files():
                           'verdir': os.path.join(mbcfg.PATHS['webroot'],
                                                  parts[1]),
                           'pd': pltdir,
-                          'histalp': 'histalp' in parts[1]},
+                          'climate': climate},
                          ignore_index=True)
 
     vdf = vdf.sort_values(by='sort_version')
 
-    # and split them into the 4 main different combinations for better handling
+    # and split them into the 6 main different combinations for better handling
     # CRU short
-    cru_short = vdf.loc[(vdf.histalp == 0) & (vdf.min_maj == 'minor')]
+    cru_short = vdf.loc[(vdf.climate == 'cru') & (vdf.min_maj == 'minor')]
     cru_short.index = np.arange(len(cru_short))
     # CRU extended
-    cru_extended = vdf.loc[(vdf.histalp == 0) & (vdf.min_maj == 'major')]
+    cru_extended = vdf.loc[(vdf.climate == 'cru') & (vdf.min_maj == 'major')]
     cru_extended.index = np.arange(len(cru_extended))
     # HITALP short
-    histalp_short = vdf.loc[(vdf.histalp == 1) & (vdf.min_maj == 'minor')]
+    histalp_short = vdf.loc[(vdf.climate == 'histalp') &
+                            (vdf.min_maj == 'minor')]
     histalp_short.index = np.arange(len(histalp_short))
+
     # HISTALP extended
-    histalp_extended = vdf.loc[(vdf.histalp == 1) & (vdf.min_maj == 'major')]
+    histalp_extended = vdf.loc[(vdf.climate == 'histalp') &
+                               (vdf.min_maj == 'major')]
     histalp_extended.index = np.arange(len(histalp_extended))
 
+    # ERA5L short
+    era5l_short = vdf.loc[(vdf.climate == 'era5l') & (vdf.min_maj == 'minor')]
+    era5l_short.index = np.arange(len(era5l_short))
+    # ERA5L extended
+    era5l_extended = vdf.loc[(vdf.climate == 'era5l') &
+                             (vdf.min_maj == 'major')]
+    era5l_extended.index = np.arange(len(era5l_extended))
+
     return {'cru_short': cru_short, 'histalp_short': histalp_short,
-            'cru_extended': cru_extended, 'histalp_extended': histalp_extended}
+            'cru_extended': cru_extended, 'histalp_extended': histalp_extended,
+            'era5l_short': era5l_short, 'era5l_extended': era5l_extended}
 
 
 def create_major_website(env, vdf, templatefile, nbpaths):

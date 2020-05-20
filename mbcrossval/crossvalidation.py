@@ -32,15 +32,10 @@ def preprocessing(gdirs):
         tasks.catchment_intersections,
         tasks.catchment_width_geom,
         tasks.catchment_width_correction,
+        tasks.process_climate_data,
     ]
     for task in task_list:
         execute_entity_task(task, gdirs)
-
-    # Climate tasks
-    if mbcfg.PARAMS['histalp']:
-        execute_entity_task(tasks.process_histalp_data, gdirs)
-    else:
-        execute_entity_task(tasks.process_cru_data, gdirs)
 
     return gdirs
 
@@ -238,16 +233,19 @@ def initialization_selection():
     # use glacierwiede mu_star in order to finde t_star: it's faster!
     cfg.PARAMS['tstar_search_glacierwide'] = True
 
+    # set climate data
+    cfg.PARAMS['baseline_climate'] = mbcfg.PARAMS['baselineclimate'].upper()
+
     # Pre-download other files which will be needed later
-    _ = utils.get_cru_file(var='tmp')
-    _ = utils.get_cru_file(var='pre')
+    # TODO _ = utils.get_cru_file(var='tmp')
+    # TODO _ = utils.get_cru_file(var='pre')
     rgi_dir = utils.get_rgi_dir(version=cfg.PATHS['rgi_version'])
 
     # Get the reference glacier ids (they are different for each RGI version)
     df, _ = utils.get_wgms_files()
     rids = df['RGI{}0_ID'.format(cfg.PATHS['rgi_version'])]
 
-    # Make a new dataframe with those (this takes a while)
+        # Make a new dataframe with those (this takes a while)
     rgidf = []
     for reg in df['RGI_REG'].unique():
         if reg == '19':
@@ -263,8 +261,11 @@ def initialization_selection():
     rgidf = pd.concat(rgidf)
     rgidf.crs = sh.crs  # for geolocalisation
 
+    rgidf = rgidf.loc[rgidf.RGIId.isin(['RGI60-13.08783', 'RGI60-13.08534'])]
+    #                                   rgidf.RGIId.iloc[:50].values.tolist())]
+
     # reduce Europe to Histalp area (exclude Pyrenees, etc...)
-    if mbcfg.PARAMS['histalp']:
+    if mbcfg.PARAMS['baselineclimate'] == 'histalp':
         rgidf = rgidf.loc[(rgidf.CenLon >= 4) &
                           (rgidf.CenLon < 20) &
                           (rgidf.CenLat >= 43) &
@@ -280,11 +281,7 @@ def initialization_selection():
     # Let OGGM do it:
     gdirs = workflow.init_glacier_regions(rgidf)
     # We need to know which period we have data for
-    if mbcfg.PARAMS['histalp']:
-        cfg.PARAMS['baseline_climate'] = 'HISTALP'
-        execute_entity_task(tasks.process_histalp_data, gdirs)
-    else:
-        execute_entity_task(tasks.process_cru_data, gdirs, print_log=False)
+    execute_entity_task(tasks.process_climate_data, gdirs)
 
     gdirs = utils.get_ref_mb_glaciers(gdirs)
     # Keep only these
