@@ -1,0 +1,71 @@
+<!DOCCTYPE html>
+<html>
+<head>
+    <link rel="shortcut icon" href=" {{ nbpaths.icon }}" />
+    <title>OGGM mass balance calibration</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% include 'stylesheet.css' %}
+</head>
+<body>
+
+<img src="{{ nbpaths.logo }}" alt="OGGM logo">
+
+{% with nbpaths=nbpaths %}
+{% include "navbar.html" %}
+{% endwith %}
+
+
+<h1>Extended mass balance calibration with ERA5-Land climate data</h1>
+<p>
+    Here you can find results for the cross-validation when the following
+    model parameters are varied:
+<ul type="square">
+    <li>Precipitation Factor</li>
+    <li>Melt Temperature</li>
+    <li>Liquid Precipitation Temperature</li>
+    <li>Temperature Lapse Rate</li>
+</ul>
+Each possible parameter combination (1215) is cross-validated and plotted
+with respect to one of the parameters. The box-whisker plots show the full
+range of results and the red dots indicates the results when using the
+proposed standard values.
+<br>
+<br>
+Results are calculated with the
+<a href="https://www.ecmwf.int/en/era5-land">ERA5-Land</a> data set.
+<br>
+<br>
+It is sensible to use different model parameters for regional model runs with
+different climate data. You can find a extended discussion about the
+proposed model parameters when using the ZAMG HISTALP data set
+<a href="https://oggm.org/2018/08/10/histalp-parameters/">
+    on the OGGM blog</a>.
+<br>
+</p>
+
+
+{% if hasdata %}
+
+<p>OGGM Version: {{ version }}.</p>
+<p>Output created: {{ date }}.</p>
+
+{{ previous }}
+{{ next }}
+<p></p>
+
+
+<article>
+    {% for cv in cvplots %}
+    <img src="plots/{{ cv }}" width="1300" height="700">
+    <hr>
+    {% endfor %}
+</article>
+
+{% endif %}
+
+
+</body>
+</html>
+
+
+
