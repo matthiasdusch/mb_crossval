@@ -206,6 +206,8 @@ def initialization_selection():
     # -------------
     cfg.initialize()
 
+    cfg.set_logging_config(logging_level=mbcfg.PARAMS['logging_level'])
+
     # working directories
     cfg.PATHS['working_dir'] = mbcfg.PATHS['working_dir']
 

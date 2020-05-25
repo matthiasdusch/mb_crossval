@@ -86,8 +86,8 @@ def run_major_crossvalidation():
                     cfg.PARAMS['temp_default_gradient'] = TG
 
                     # execute calibraion and crossvalidation
-                    log.info('prcpSF={}, Tliq={}, Tmelt={}, Tgrad={}'.format(
-                        PR, TL, TM, TG))
+                    log.workflow('prcpSF={}, Tliq={}, Tmelt={}, Tgrad={}'.
+                        format(PR, TL, TM, TG))
                     xval = calibration(gdirs, xval, major=1)
 
     outdict = {'statistic': xval,

@@ -44,6 +44,9 @@ def initialize(cfgfile):
     if PARAMS['region'] == 'None':
         PARAMS['region'] = None
 
+    # logging
+    PARAMS['logging_level'] = cp['logging_level']
+
     PARAMS['oggmversion'] = oggm.__version__
 
     # run tasks
