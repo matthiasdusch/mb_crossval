@@ -237,15 +237,13 @@ def initialization_selection():
     cfg.PARAMS['baseline_climate'] = mbcfg.PARAMS['baselineclimate'].upper()
 
     # Pre-download other files which will be needed later
-    # TODO _ = utils.get_cru_file(var='tmp')
-    # TODO _ = utils.get_cru_file(var='pre')
     rgi_dir = utils.get_rgi_dir(version=cfg.PATHS['rgi_version'])
 
     # Get the reference glacier ids (they are different for each RGI version)
     df, _ = utils.get_wgms_files()
     rids = df['RGI{}0_ID'.format(cfg.PATHS['rgi_version'])]
 
-        # Make a new dataframe with those (this takes a while)
+    # Make a new dataframe with those (this takes a while)
     rgidf = []
     for reg in df['RGI_REG'].unique():
         if reg == '19':
@@ -260,9 +258,6 @@ def initialization_selection():
         rgidf.append(sh.loc[sh.RGIId.isin(rids)])
     rgidf = pd.concat(rgidf)
     rgidf.crs = sh.crs  # for geolocalisation
-
-    rgidf = rgidf.loc[rgidf.RGIId.isin(['RGI60-13.08783', 'RGI60-13.08534'])]
-    #                                   rgidf.RGIId.iloc[:50].values.tolist())]
 
     # reduce Europe to Histalp area (exclude Pyrenees, etc...)
     if mbcfg.PARAMS['baselineclimate'] == 'histalp':
