@@ -140,8 +140,16 @@ def quick_crossval_entity(gdir, full_ref_df=None):
 
     # unclear how to treat this best
     if ref_std == 0:
-        ref_std = refmb.OGGM.std()
-        rcor = 1
+        # previous:
+        # ref_std = refmb.OGGM.std()
+        # rcor = 1
+        # -------------
+        # but this fails if refmb.OGGM has NaNs. try:
+        if np.isnan(refmb.OGGM.std()):
+            rcor = np.nan
+        else:
+            ref_std = refmb.OGGM.std()
+            rcor = 1
 
     tmpdf.loc[len(tmpdf.index)] = {'std_oggm': refmb.OGGM.std(),
                                    'std_ref': ref_std,
